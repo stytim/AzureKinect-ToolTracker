@@ -6,4 +6,6 @@ add_subdirectory(imgui)
 add_subdirectory(nanosockets)
 add_subdirectory(nfd)
 add_subdirectory(json)
-
+if (WIN32)
+    add_subdirectory(k4a)
+endif()

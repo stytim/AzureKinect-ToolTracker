@@ -39,31 +39,18 @@ ENDIF(MSVC)
 
 add_subdirectory(extern)
 
-# Simple non robust way to find the librealsense library
-if(WIN32)
-    # if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-    #     set(realsense2_LIBRARY "C:\\Program Files (x86)\\Intel RealSense SDK 2.0\\lib\\x64\\realsense2.lib")          # TODO: Update this variable to correct path - folder where realsense2.lib is found
-    #     set(DLL_DIR "C:\\Program Files (x86)\\Intel RealSense SDK 2.0\\bin\\x64")              # TODO: Update this variable to correct path - folder where realsense2.dll is found
-    # else()
-    #     set(realsense2_LIBRARY "C:\\Program Files (x86)\\Intel RealSense SDK 2.0\\lib\\x86")          # TODO: Update this variable to correct path - folder where realsense2.lib is found
-    #     set(DLL_DIR "C:\\Program Files (x86)\\Intel RealSense SDK 2.0\\bin\\x86")              # TODO: Update this variable to correct path - folder where realsense2.dll is found
-    # endif()
-    # set(PROJECT_BINARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/\$\(Configuration\)")                # TODO: Update this variable to correct path - folder to which your project will compile
-    # set(realsense2_INCLUDE_DIR "C:\\Program Files (x86)\\Intel RealSense SDK 2.0\\include")   # TODO: Update this variable to correct path - folder where librealsense2 folder is found
-
-else()
-    # Find the RealSense SDK
-    #find_package(realsense2 REQUIRED)
+# Simple non robust way to find the k4a library
+if(NOT WIN32)
+    # Find the Azure Kinect SDK
     find_package( k4a REQUIRED )
 endif()
 
 # Find OpenCV
 find_package(OpenCV REQUIRED)
 
-# Include directories for RealSense, OpenCV
-# include_directories(${realsense2_INCLUDE_DIR})
+# Include directories for OpenCV
 include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(${K4A_INCLUDE_DIRS})
+
 set(TRACKER_SOURCE_FILES
     include/IRStructs.h
     include/IRKalmanFilter.h
@@ -133,6 +120,34 @@ target_link_libraries(ir-tracking-app PRIVATE
                         nfd
                         json)
 
+if(WIN32)
+
+    set(DYNLIB_TARGET ir-tracking-app)
+    set(DYNLIB_DEST "$<TARGET_FILE_DIR:${DYNLIB_TARGET}>")
+
+    message("Copying k4a library to build folder: ${K4A_DYNLIB}")
+    add_custom_command(TARGET ${DYNLIB_TARGET} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+            "${K4A_DYNLIB}"
+            "${DYNLIB_DEST}"
+    )
+
+    message("Copying k4a library to build folder: ${K4ARECORD_DYNLIB}")
+    add_custom_command(TARGET ${DYNLIB_TARGET} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+            "${K4ARECORD_DYNLIB}"
+            "${DYNLIB_DEST}"
+    )
+
+    message("Copying k4a library to build folder: ${DEPTHENGINE_DYNLIB}")
+    add_custom_command(TARGET ${DYNLIB_TARGET} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+            "${DEPTHENGINE_DYNLIB}"
+            "${DYNLIB_DEST}"
+    )
+
+    
+endif()
 
 
 

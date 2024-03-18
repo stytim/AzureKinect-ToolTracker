@@ -4,6 +4,7 @@
 #define IRTOOLTRACKING_H
 
 #include <k4a/k4a.h>
+#include <k4arecord/playback.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
@@ -143,27 +144,7 @@ private:
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     k4a_calibration_t calibration;
 
-    // rs2::context ctx;
-
-    // // RealSense pipeline to manage streaming
-    // rs2::pipeline pipeline;
-
-    // // Configuration for the RealSense streams
-    // rs2::config config;
-
-    // rs2::pipeline_profile profile;
-
-    // rs2::device_list devices;
-
-    // rs2::device dev;
-
-    // rs2_intrinsics intrinsics;
-
-    // rs2::colorizer color_map;
-
-    // rs2::spatial_filter spat_filter;    // Spatial Filter
-    // rs2::temporal_filter temp_filter;   // Temporal Filter
-
+    k4a_playback_t playback = NULL;
 
 };
 

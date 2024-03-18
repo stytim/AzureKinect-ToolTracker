@@ -7,17 +7,6 @@ IRToolTracking::IRToolTracking() {
 }
 
 void IRToolTracking::queryDevices() {
-	// devices = ctx.query_devices();
-    // deviceNames.clear();
-	// if (devices.size() == 0) {
-	// 	std::cerr << "No RealSense devices found." << std::endl;
-	// 	return;
-	// }
-	// for (size_t i = 0; i < devices.size(); i++) {
-    //     std::stringstream ss;
-    //     ss << "[" << i << "] " << devices[i].get_info(RS2_CAMERA_INFO_NAME) << " (" << devices[i].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER) << ")";
-    //     deviceNames.push_back(ss.str());
-	// }
 
     device_count = k4a_device_get_installed_count();
     deviceNames.clear();
@@ -29,76 +18,46 @@ void IRToolTracking::queryDevices() {
 
     for (size_t i = 0; i < device_count; i++)
     {
+        
+        k4a_device_open(i, &device);
+        char serial_number[256];
+        size_t serial_number_length = sizeof(serial_number);
+        k4a_device_get_serialnum(device, serial_number, &serial_number_length);
+        k4a_device_close(device);
+        
         std::stringstream ss;
-        ss << "[" << i << "] " << "K4A Device";
-
-        //ss << "[" << i << "] " << devices[i].get_info(RS2_CAMERA_INFO_NAME) << " (" << devices[i].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER) << ")";
+        ss << "[" << i << "] " << "K4A Device" << " (" << serial_number << ")";
         deviceNames.push_back(ss.str());
     }
 }
 
 void IRToolTracking::initializeFromFile(const std::string& file) {
-    // Get the width and height of the frames from the file
-    // rs2::pipeline pipe(ctx);
-    // rs2::config cfg;
-    // cfg.enable_device_from_file(file);
-    // pipe.start(cfg);
-    // auto profile = pipe.get_active_profile();
-    // auto depth_profile = profile.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
-    // frame_width = depth_profile.width();
-    // frame_height = depth_profile.height();
-    // pipe.stop();
+    
+    auto result = k4a_playback_open(file.c_str(), &playback);
+    if (result  != K4A_RESULT_SUCCEEDED)
+    {
+        std::cerr << "Failed to open file " << file << std::endl;
+        return;
+    }
+    k4a_playback_get_calibration(playback, &calibration);
+    Terminated = false;
+    playFromFile = true;
 
-    // // Load the configuration from file
-    // config.enable_device_from_file(file);
-    // intrinsics_found = false;
-    // Terminated = false;
-    // playFromFile = true;
 }
 
 void IRToolTracking::initialize(int index, int width, int height) {
 
-    // if (index < 0 || index >= devices.size()) {
-    //     std::cerr << "Invalid device index." << std::endl;
-    //     Terminated = true;
-    //     return;
-    // }
-
-    // dev = devices[index];
-    // //dev.hardware_reset();
-    // std::string model_name = dev.get_info(RS2_CAMERA_INFO_NAME);
-    // if (model_name == "Intel RealSense D415") {
-    //     irThreshold = 100;
-    //     minSize = 10;
-    //     maxSize = 300;
-    // }
-    // else if (model_name == "Intel RealSense D435") {
-    //     irThreshold = 180;
-    //     minSize = 10;
-    //     maxSize = 370;
-    // }
-    // SetThreshold(irThreshold);
-    // SetMinMaxSize(minSize, maxSize);
-
-    // frame_width = width;
-    // frame_height = height;
-    // intrinsics_found = false;
-    // // Configure the RealSense pipeline
-
-    // config.enable_device(dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
-
-    // config.enable_stream(RS2_STREAM_INFRARED, 1, frame_width, frame_height, RS2_FORMAT_Y8, 90);
-    // config.enable_stream(RS2_STREAM_DEPTH, frame_width, frame_height, RS2_FORMAT_Z16, 90);
-
-    device_count = k4a_device_get_installed_count();
-
-    if (device_count == 0)
-    {
-        std::cout << "No K4A devices found" << std::endl;
+    if (index < 0 || index >= static_cast<int>(device_count)) {
+        std::cerr << "Invalid device index." << std::endl;
+        Terminated = true;
         return;
     }
 
-    if (K4A_RESULT_SUCCEEDED != k4a_device_open(K4A_DEVICE_DEFAULT, &device))
+
+    // SetThreshold(irThreshold);
+    // SetMinMaxSize(minSize, maxSize);
+
+    if (K4A_RESULT_SUCCEEDED != k4a_device_open(index, &device))
     {
         std::cout << "Failed to open device" << std::endl;
         k4a_device_close(device);
@@ -108,7 +67,7 @@ void IRToolTracking::initialize(int index, int width, int height) {
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config.depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
     config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
-    // // Retrive calibration
+    // Retrive calibration
     calibration;
     if (K4A_RESULT_SUCCEEDED != k4a_device_get_calibration(device, config.depth_mode, config.color_resolution, &calibration))
     {
@@ -140,43 +99,12 @@ void IRToolTracking::StopToolCalibration()
 
 void IRToolTracking::setLaserPower(int power)
 {
-    // if (dev) {
-    //     // Check if the device is a depth sensor and supports laser power control
-    //     auto depth_sensor = dev.first<rs2::depth_sensor>();
-    //     if (depth_sensor.supports(RS2_OPTION_LASER_POWER)) {
-    //         depth_sensor.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
-    //         // Ensure the power level is within the allowable range
-    //         auto range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
-    //         power = std::min(std::max(power, static_cast<int>(range.min)), static_cast<int>(range.max));
-
-    //         // Set the laser power
-    //         depth_sensor.set_option(RS2_OPTION_LASER_POWER, static_cast<float>(power));
-    //     } else {
-    //         std::cerr << "This RealSense device does not support changing laser power." << std::endl;
-    //     }
-    // } else {
-    //     std::cerr << "RealSense device not initialized." << std::endl;
-    // }
+   
 }
 
 void IRToolTracking::getLaserPower(int &power, int &min, int &max)
 {
-    // if (dev) {
-    //     // Check if the device is a depth sensor and supports laser power control
-    //     auto depth_sensor = dev.first<rs2::depth_sensor>();
-    //     if (depth_sensor.supports(RS2_OPTION_LASER_POWER)) {
-    //         // Get the current laser power
-    //         power = depth_sensor.get_option(RS2_OPTION_LASER_POWER);
-    //         auto range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
-    //         min = static_cast<int>(range.min);
-    //         max = static_cast<int>(range.max);
-    //     } else {
-    //         std::cerr << "This RealSense device does not support laser power option." << std::endl;
-    //     }
-        
-    // } else {
-    //     std::cerr << "RealSense device not initialized." << std::endl;
-    // }
+    
 }
 
 void IRToolTracking::processStreams() {
@@ -189,15 +117,6 @@ void IRToolTracking::processStreams() {
         std::cout<<"Failed to start device"<<std::endl;
         return;
     }
-
-    // if (K4A_RESULT_SUCCEEDED == k4a_device_get_calibration(device.handle(), config.depth_mode, config.color_resolution, &calibration))
-    // {
-    //     printf("calibrate succeed\n");
-    // }
-    // else
-    // {
-    //     printf("calibrate failed\n");
-    // }
 
     k4a_capture_t capture = NULL;
     k4a_image_t depth_image = NULL;
@@ -244,10 +163,6 @@ void IRToolTracking::processStreams() {
         // Get the width and height of the depth frame
         frame_width = k4a_image_get_width_pixels(depth_image);
         frame_height = k4a_image_get_height_pixels(depth_image);
-
-        // Colorize the depth frame
-        // rs2::frame colorized_depth = color_map.colorize(depth_frame);
-    
 
         // Get the timestamp of the current frame
         double timestamp = k4a_image_get_device_timestamp_usec(depth_image);

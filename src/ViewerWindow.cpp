@@ -138,7 +138,7 @@ void ViewerWindow::Initialize(const std::string& file) {
         //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
     #endif
 
-    window = glfwCreateWindow( 1060, 720, "RealSense Tool Tracker", nullptr, nullptr );
+    window = glfwCreateWindow( 1060, 720, "K4A Tool Tracker", nullptr, nullptr );
     if (window == nullptr)
     {
         std::cerr <<"glfwCreateWindow failed" << std::endl;
