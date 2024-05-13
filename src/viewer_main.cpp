@@ -17,12 +17,12 @@ int main(int argc, char **argv)
         CmdParser::OptionParser cmd_parser;
         cmd_parser.RegisterOption("-h|--help", "Prints this help", [&]()
                                 {
-                                    std::cout << "ir-tracking-app [options] <realsense_recording.bag> \n"
+                                    std::cout << "ir-tracking-app [options] <k4a_recording.mkv> \n"
                                         << std::endl;
                                     cmd_parser.PrintOptions();
                                     exit(0); 
                                 });
-        cmd_parser.RegisterOption("-i|--input", "RealSense recording file path", 1,
+        cmd_parser.RegisterOption("-i|--input", "k4a recording file path", 1,
                                   [&](const std::vector<char *> &args)
                                 {
                                     inputFilePath = args[0];

@@ -39,7 +39,12 @@ void IRToolTracking::initializeFromFile(const std::string& file) {
         std::cerr << "Failed to open file " << file << std::endl;
         return;
     }
-    k4a_playback_get_calibration(playback, &calibration);
+    result = k4a_playback_get_calibration(playback, &calibration);
+    if (result != K4A_RESULT_SUCCEEDED)
+    {
+        std::cerr << "Failed to get calibration" << std::endl;
+        return;
+    }
     Terminated = false;
     playFromFile = true;
 
@@ -68,7 +73,6 @@ void IRToolTracking::initialize(int index, int width, int height) {
     config.depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
     config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
     // Retrive calibration
-    calibration;
     if (K4A_RESULT_SUCCEEDED != k4a_device_get_calibration(device, config.depth_mode, config.color_resolution, &calibration))
     {
         std::cout << "Failed to get calibration" << std::endl;
@@ -112,10 +116,13 @@ void IRToolTracking::processStreams() {
     if (Terminated)
         return;
     // Start the pipeline
-    if (K4A_RESULT_SUCCEEDED != k4a_device_start_cameras(device, &config))
+    if (!playFromFile)
     {
-        std::cout<<"Failed to start device"<<std::endl;
-        return;
+        if (K4A_RESULT_SUCCEEDED != k4a_device_start_cameras(device, &config))
+        {
+            std::cout << "Failed to start device" << std::endl;
+            return;
+        }
     }
 
     k4a_capture_t capture = NULL;
@@ -128,20 +135,39 @@ void IRToolTracking::processStreams() {
 
     // Continuously capture frames and process them
     while (!Terminated) {
-        // Get a depth frame
-        switch (k4a_device_get_capture(device, &capture, TIMEOUT_IN_MS))
-        {
-        case K4A_WAIT_RESULT_SUCCEEDED:
-            break;
-        case K4A_WAIT_RESULT_TIMEOUT:
-            std::cout<<"Timed out waiting for a capture"<<std::endl;
-            continue;
-            break;
-        case K4A_WAIT_RESULT_FAILED:
-            std::cout<<"Failed to read a capture"<<std::endl;
-            k4a_device_close(device);
-            return;
-        }
+
+		if (playFromFile)
+		{
+            switch (k4a_playback_get_next_capture(playback, &capture))
+            {
+			case K4A_STREAM_RESULT_SUCCEEDED:
+				break;
+			case K4A_STREAM_RESULT_FAILED:
+				std::cout << "Timed out waiting for a capture" << std::endl;
+				continue;
+				break;
+			case K4A_STREAM_RESULT_EOF:
+				std::cout << "Reached end of the file" << std::endl;
+				return;
+            }
+		}
+		else
+		{
+			// Get a depth frame
+			switch (k4a_device_get_capture(device, &capture, TIMEOUT_IN_MS))
+			{
+			case K4A_WAIT_RESULT_SUCCEEDED:
+				break;
+			case K4A_WAIT_RESULT_TIMEOUT:
+				std::cout << "Timed out waiting for a capture" << std::endl;
+				continue;
+				break;
+			case K4A_WAIT_RESULT_FAILED:
+				std::cout << "Failed to read a capture" << std::endl;
+				k4a_device_close(device);
+				return;
+			}
+		}
 
         // Retrieve depth image
         depth_image = k4a_capture_get_depth_image(capture);
@@ -192,6 +218,12 @@ void IRToolTracking::processStreams() {
         k4a_image_release(depth_image);
         k4a_image_release(ir_image);
         k4a_capture_release(capture);
+
+		if (playFromFile)
+		{
+			// Sleep for 33ms to simulate 30fps
+			std::this_thread::sleep_for(std::chrono::milliseconds(33));
+		}
     }
 }
 
@@ -201,6 +233,10 @@ void IRToolTracking::shutdown() {
     {
         k4a_device_close(device);
     }
+	if (playback != NULL)
+	{
+		k4a_playback_close(playback);
+	}
     trackingFrame.release();
     depthFrame.release();
 }
