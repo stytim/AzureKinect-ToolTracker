@@ -102,7 +102,7 @@ private:
 
 	IRToolTracking* m_pRealSenseToolTracking;
 
-	uchar m_Threshold = 100;
+	ushort m_Threshold = 3000;
 	int m_MinSize = 10;
 	int m_MaxSize = 180;
 

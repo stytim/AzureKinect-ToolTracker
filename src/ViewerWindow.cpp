@@ -686,7 +686,6 @@ void ViewerWindow::Render() {
                     else
                     {
                         tracker.initialize(selectedDeviceIndex, 848, 480);
-                        tracker.getLaserPower(laserPower, minlasPower, maxlasPower);
                     }
                     tracker.StartToolTracking();
                     irThreshold = tracker.GetThreshold();
@@ -708,20 +707,11 @@ void ViewerWindow::Render() {
         // Add a slider for setting the IR threshold
         ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_FirstUseEver);
         ImGui::Begin("IR Threshold Control", nullptr, overlayFlags);
-        // if not on Mac
-        #if !defined(__APPLE__)
-        {
-            if(ImGui::SliderInt("Laser Power", &laserPower, minlasPower, maxlasPower))
-            {
-                tracker.setLaserPower(laserPower);
-            }
-        }
-        #endif
-        if(ImGui::SliderInt("IR Threshold", &irThreshold, 0, 255))
+        if(ImGui::SliderInt("IR Threshold", &irThreshold, 2000, 4000))
         {
             tracker.SetThreshold(irThreshold);
         }
-        ImGui::SetNextItemWidth(100);
+       /* ImGui::SetNextItemWidth(100);
         if (ImGui::InputInt("Min Px", &minPixelSize))
         {
             tracker.SetMinMaxSize(minPixelSize, maxPixelSize);
@@ -731,7 +721,7 @@ void ViewerWindow::Render() {
         if (ImGui::InputInt("Max Px", &maxPixelSize))
         {
             tracker.SetMinMaxSize(minPixelSize, maxPixelSize);
-        }
+        }*/
         ImGui::End();
 
         // Checkbox for enabling UDP

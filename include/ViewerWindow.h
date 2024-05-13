@@ -79,10 +79,8 @@ private:
     std::string recordedFile = "";
 
     IRToolTracking tracker;
-    int irThreshold = 100;
-    int laserPower = 300;
-    int minlasPower = 0;
-    int maxlasPower = 360;
+    int irThreshold = 3000;
+
     int minPixelSize = 10;
     int maxPixelSize = 300;
     bool isToolAdded = false;

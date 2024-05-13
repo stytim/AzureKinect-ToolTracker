@@ -620,21 +620,16 @@ void IRToolTracker::regionGrowing(const cv::Mat &depthImage, const std::vector<c
 }
 
 bool IRToolTracker::ProcessFrame(AHATFrame* rawFrame, ProcessedAHATFrame &result) {
-	uchar lowerLimit = m_Threshold;
-	uchar upperLimit = lowerLimit + 1;// 256 * 20;
+	//uchar lowerLimit = m_Threshold;
 	int minSize = m_MinSize, maxSize = m_MaxSize;
 	cv::Mat labels, stats, centroids;
 	std::vector<float> irToolCenters;
 
-	// rawFrame->cvAbImage.forEach<uchar>(
-	// 	[&](uchar& ir, const int* position) -> void {
-	// 		ir = (std::clamp(ir, lowerLimit, upperLimit) - lowerLimit) / (upperLimit - lowerLimit)*255;
-	// 	}
-	// );
+	std::cout << m_Threshold << std::endl;
 
 	// Threshold IR image
 	cv::Mat thresholdedIR;
-	cv::threshold(rawFrame->cvAbImage, thresholdedIR, 3000, 255, cv::THRESH_BINARY);
+	cv::threshold(rawFrame->cvAbImage, thresholdedIR, m_Threshold, 255, cv::THRESH_BINARY);
 
 	thresholdedIR.convertTo(rawFrame->cvAbImage, CV_8UC1);
 

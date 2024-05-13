@@ -58,10 +58,6 @@ void IRToolTracking::initialize(int index, int width, int height) {
         return;
     }
 
-
-    // SetThreshold(irThreshold);
-    // SetMinMaxSize(minSize, maxSize);
-
     if (K4A_RESULT_SUCCEEDED != k4a_device_open(index, &device))
     {
         std::cout << "Failed to open device" << std::endl;
@@ -79,6 +75,9 @@ void IRToolTracking::initialize(int index, int width, int height) {
         k4a_device_close(device);
         return;
     }
+
+	irThreshold = 3000;
+    SetThreshold(irThreshold);
 
     Terminated = false;
 }

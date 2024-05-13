@@ -120,7 +120,7 @@ private:
 
     // int frame_width = 848;
     // int frame_height = 480;
-    int irThreshold = 100;
+    int irThreshold = 3000;
     int minSize = 10;
     int maxSize = 280;
 
