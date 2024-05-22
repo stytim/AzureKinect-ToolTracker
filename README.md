@@ -1,4 +1,4 @@
-# IR Retro-reflective Marker Tracking with Intel RealSense
+# IR Retro-reflective Marker Tracking with Azure Kinect
 
 [![GitHub release](https://img.shields.io/github/release/stytim/AzureKinect-ToolTracker.svg?style=flat-square)](https://github.com/stytim/AzureKinect-ToolTracker/releases)
 
@@ -56,7 +56,7 @@ Note: I have only tested this build process with Visual Studio 2022.
 
 ## Usage Guide
 
-Upon launching the RealSense Tool Tracker, the application will attempt to load previously defined tool configurations from the 'Tools' directory. Follow the steps below to set up your environment and begin tracking:
+Upon launching the K4A Tool Tracker, the application will attempt to load previously defined tool configurations from the 'Tools' directory. Follow the steps below to set up your environment and begin tracking:
 
 ### 1. Tool Configuration:
 
