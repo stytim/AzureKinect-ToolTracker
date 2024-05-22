@@ -625,8 +625,6 @@ bool IRToolTracker::ProcessFrame(AHATFrame* rawFrame, ProcessedAHATFrame &result
 	cv::Mat labels, stats, centroids;
 	std::vector<float> irToolCenters;
 
-	std::cout << m_Threshold << std::endl;
-
 	// Threshold IR image
 	cv::Mat thresholdedIR;
 	cv::threshold(rawFrame->cvAbImage, thresholdedIR, m_Threshold, 255, cv::THRESH_BINARY);

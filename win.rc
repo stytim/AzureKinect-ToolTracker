@@ -10,10 +10,10 @@ PRODUCTVERSION 0, 0, 0, 0
         BLOCK "000004B0"
         {
             VALUE "CompanyName", "Tianyu Song\0"
-                VALUE "FileDescription", "Realsense Tool Tracker\0"
+                VALUE "FileDescription", "K4A Tool Tracker\0"
                 VALUE "FileVersion", "git\0"
                 VALUE "OriginalFilename", "ir-tracking-app.exe\0"
-                VALUE "ProductName", "Realsense Tool Tracker\0"
+                VALUE "ProductName", "K4A Tool Tracker\0"
                 VALUE "ProductVersion", "git\0"
         }
     }
